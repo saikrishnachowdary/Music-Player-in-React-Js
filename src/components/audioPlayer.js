@@ -11,7 +11,6 @@ const AudioPlayer = ({ url, image }) => {
         if (audioRef && audioRef.current) {
             if (playing) {
                 audioRef.current.play()
-                console.log('audioRef.current.currentTime:', audioRef.current.duration)
             } else {
                 audioRef.current.pause()
             }
@@ -28,24 +27,29 @@ const AudioPlayer = ({ url, image }) => {
     }, [mute])
 
     const [progressData, setprogressData] = useState({
-        CurrentPlayTime: 0,
-        Duration:100
+        CurrentPlayTime: audioRef.current ? audioRef.current.currentTime : 0 ,
+        Duration: audioRef.current ? audioRef.current.duration : 100  ,
     })
 
-    setInterval(() => {
+    const [audiotimeChange, setaudiotimeChange] = useState ()
+
+    useEffect( () => {
         if (audioRef && audioRef.current) {
-            setprogressData({
-                ...progressData,
-                CurrentPlayTime: audioRef.current.currentTime,
-                Duration: audioRef.current.duration
-            })
-        } else {
-            
+            if (audiotimeChange) {
+                audioRef.current.currentTime = (audiotimeChange * progressData.Duration / 100);
+                console.log("SEEKED", audiotimeChange * progressData.Duration / 100 )
+            } else {
+                
+            }
         }
-    },1000)
+    }, [audiotimeChange])
+
+
+
+    
     return (
         <div className='audioplayerContainer'>
-          <audio src={url} ref={audioRef} />
+            <audio loop={false} src={url} ref={audioRef}  onTimeUpdate={(e) => setprogressData({ ...progressData, CurrentPlayTime: e.target.currentTime, Duration: e.target.duration })} />
             <div>
                 <img
                     height="256"
@@ -109,9 +113,11 @@ const AudioPlayer = ({ url, image }) => {
                             )}
                     </div>
                 </div>
-                <div className="CustomProgressbar">
-                    <div className="CustomProgressbar1" style={{ width: progressData.CurrentPlayTime * 100 / progressData.Duration}}>&nbsp;</div>
-                </div>
+                <input className='rangeSlider' type='range' min={0} max={100} value={(progressData.CurrentPlayTime / progressData.Duration) * 100} step="1" onChange={(e) => setaudiotimeChange(parseInt(e.target.value)) } />
+
+                {/* <div className="CustomProgressbar">
+                    <div className="CustomProgressbar1" style={{ width: progressData.CurrentPlayTime * 100 / progressData.Duration }}>&nbsp;</div>
+                </div> */}
             </div>
         </div>
     )
