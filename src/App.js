@@ -9,7 +9,7 @@ function App() {
     <>
       <div className='Mcontainer'>
         <div>hiii im saikrishna pachala</div>
-       
+        <AudioPlayer url={url} image={image} />
       </div>
     </>
   );
